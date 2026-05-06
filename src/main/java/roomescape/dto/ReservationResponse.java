@@ -1,6 +1,6 @@
 package roomescape.dto;
 
-import roomescape.domain_model.Reservation;
+import roomescape.model.Reservation;
 
 public class ReservationResponse {
     public long id;
@@ -11,7 +11,7 @@ public class ReservationResponse {
     public ReservationResponse(Reservation reservation) {
         this.id = reservation.getId();
         this.name = reservation.getName();
-        this.date = reservation.getDate();
-        this.time = reservation.getTime();
+        this.date = reservation.getStartTime().toLocalDate().toString();
+        this.time = reservation.getStartTime().toLocalTime().toString();
     }
 }
