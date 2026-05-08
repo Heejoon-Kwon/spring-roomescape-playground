@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
+import roomescape.exception.InvalidDateOrTimeFormatException;
 import roomescape.service.ReservationService;
 
 import java.net.URI;
@@ -23,11 +24,11 @@ public class ReservationController {
 
     @GetMapping
     public List<ReservationResponse> showReservations() {
-        return reservationService.getResevations();
+        return reservationService.getReservations();
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> addReservation(@RequestBody ReservationRequest request) {
+    public ResponseEntity<ReservationResponse> addReservation(@RequestBody ReservationRequest request) throws InvalidDateOrTimeFormatException {
         ReservationResponse response = reservationService.addReservation(request);
 
         return ResponseEntity
