@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidDateOrTimeFormatException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalidDateTime(RuntimeException e) {
+    public ResponseEntity<Map<String, Object>> handleInvalidDateTime(InvalidDateOrTimeFormatException e) {
         return createExceptionResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
