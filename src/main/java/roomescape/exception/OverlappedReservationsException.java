@@ -1,7 +1,9 @@
 package roomescape.exception;
 
-public class OverlappedReservationsException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class OverlappedReservationsException extends BusinessException {
     public OverlappedReservationsException(String message) {
-        super(message);
+        super(message, HttpStatus.CONFLICT);
     }
 }

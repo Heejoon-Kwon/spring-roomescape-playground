@@ -28,7 +28,7 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> addReservation(@RequestBody ReservationRequest request) throws InvalidDateOrTimeFormatException {
+    public ResponseEntity<ReservationResponse> addReservation(@RequestBody ReservationRequest request) {
         ReservationResponse response = reservationService.addReservation(request);
 
         return ResponseEntity

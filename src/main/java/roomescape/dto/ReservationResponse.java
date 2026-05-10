@@ -3,10 +3,10 @@ package roomescape.dto;
 import roomescape.model.Reservation;
 
 public class ReservationResponse {
-    public long id;
-    public String name;
-    public String date;
-    public String time;
+    public final long id;
+    public final String name;
+    public final String date;
+    public final String time;
 
     public ReservationResponse(Reservation reservation) {
         this.id = reservation.getId();

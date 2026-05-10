@@ -1,7 +1,9 @@
 package roomescape.exception;
 
-public class InvalidDateOrTimeFormatException extends Exception {
+import org.springframework.http.HttpStatus;
+
+public class InvalidDateOrTimeFormatException extends BusinessException {
     public InvalidDateOrTimeFormatException(String message) {
-        super(message);
+        super(message, HttpStatus.BAD_REQUEST);
     }
 }

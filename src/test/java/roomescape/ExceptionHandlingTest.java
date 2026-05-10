@@ -1,67 +1,97 @@
 package roomescape;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import roomescape.controller.GlobalExceptionHandler;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import roomescape.controller.ReservationController;
+import roomescape.dto.ReservationRequest;
 import roomescape.exception.InvalidDateOrTimeFormatException;
+import roomescape.exception.NoSuchElementToDeleteException;
 import roomescape.exception.OverlappedReservationsException;
 import roomescape.exception.RequestParameterMissingException;
+import roomescape.service.ReservationService;
 
-import java.util.Map;
-import java.util.NoSuchElementException;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
+@WebMvcTest(ReservationController.class)
 class ExceptionHandlingTest {
 
-    private final GlobalExceptionHandler exceptionHandler = new GlobalExceptionHandler();
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private ReservationService reservationService;
 
     @Test
-    void missingParameterExceptionCreatesBadRequestResponse() {
-        ResponseEntity<Map<String, Object>> response = exceptionHandler.handleMissingParameter(
-                new RequestParameterMissingException("name")
-        );
+    void missingParameterExceptionCreatesBadRequestResponse() throws Exception {
+        given(reservationService.addReservation(any(ReservationRequest.class)))
+                .willThrow(new RequestParameterMissingException("name"));
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody())
-                .containsEntry("message", "name is missing.")
-                .containsKey("timestamp");
+        mockMvc.perform(post("/reservations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(reservationJson("", "2023-08-05", "15:40")))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("name is missing."))
+                .andExpect(jsonPath("$.timestamp").exists());
     }
 
     @Test
-    void invalidDateOrTimeExceptionCreatesBadRequestResponse() {
-        ResponseEntity<Map<String, Object>> response = exceptionHandler.handleInvalidDateTime(
-                new InvalidDateOrTimeFormatException("Date or Time has invalid format.")
-        );
+    void invalidDateOrTimeExceptionCreatesBadRequestResponse() throws Exception {
+        given(reservationService.addReservation(any(ReservationRequest.class)))
+                .willThrow(new InvalidDateOrTimeFormatException("Date or Time has invalid format."));
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody())
-                .containsEntry("message", "Date or Time has invalid format.")
-                .containsKey("timestamp");
+        mockMvc.perform(post("/reservations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(reservationJson("Brown", "invalid-date", "15:40")))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Date or Time has invalid format."))
+                .andExpect(jsonPath("$.timestamp").exists());
     }
 
     @Test
-    void overlappedReservationsExceptionCreatesConflictResponse() {
-        ResponseEntity<Map<String, Object>> response = exceptionHandler.handleOverlappedReservations(
-                new OverlappedReservationsException("Reservations overlap")
-        );
+    void overlappedReservationsExceptionCreatesBadRequestResponse() throws Exception {
+        given(reservationService.addReservation(any(ReservationRequest.class)))
+                .willThrow(new OverlappedReservationsException("Reservations overlap"));
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
-        assertThat(response.getBody())
-                .containsEntry("message", "Reservations overlap")
-                .containsKey("timestamp");
+        mockMvc.perform(post("/reservations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(reservationJson("Brown", "2023-08-05", "15:40")))
+                .andExpect(status().isConflict())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Reservations overlap"))
+                .andExpect(jsonPath("$.timestamp").exists());
     }
 
     @Test
-    void noSuchElementExceptionCreatesNotFoundResponse() {
-        ResponseEntity<Map<String, Object>> response = exceptionHandler.handleNoElementToDelete(
-                new NoSuchElementException("No such a reservation with id 999")
-        );
+    void noSuchElementToDeleteExceptionCreatesNotFoundResponse() throws Exception {
+        willThrow(new NoSuchElementToDeleteException("No such a reservation with id 999"))
+                .given(reservationService)
+                .deleteReservation(999L);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(response.getBody())
-                .containsEntry("message", "No such a reservation with id 999")
-                .containsKey("timestamp");
+        mockMvc.perform(delete("/reservations/999"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("No such a reservation with id 999"))
+                .andExpect(jsonPath("$.timestamp").exists());
+    }
+
+    private static String reservationJson(String name, String date, String time) {
+        return "{"
+                + "\"name\":\"" + name + "\","
+                + "\"date\":\"" + date + "\","
+                + "\"time\":\"" + time + "\""
+                + "}";
     }
 }

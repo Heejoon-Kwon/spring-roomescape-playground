@@ -1,11 +1,11 @@
 package roomescape.model;
 
+import roomescape.exception.NoSuchElementToDeleteException;
 import roomescape.exception.OverlappedReservationsException;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 public class Reservations {
 
@@ -24,7 +24,7 @@ public class Reservations {
         Reservation target = reservations.stream()
                 .filter(reservation -> reservation.getId().equals(id))
                 .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("No such a reservation with id "+id));
+                .orElseThrow(() -> new NoSuchElementToDeleteException("No such a reservation with id "+id));
 
         reservations.remove(target);
     }
