@@ -14,16 +14,6 @@ public class UpdatingDAO {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private final RowMapper<Reservation> actorRowMapper = (resultSet, rowNum) -> {
-        Reservation reservation = new Reservation(
-                resultSet.getLong("id"),
-                resultSet.getString("name"),
-                resultSet.getDate("date").toLocalDate(),
-                resultSet.getTime("time").toLocalTime()
-        );
-        return reservation;
-    };
-
     public void insert(Reservation reservation) {
         String sql = "insert into reservation(name, date, time) values(?, ?, ?)";
         jdbcTemplate.update(

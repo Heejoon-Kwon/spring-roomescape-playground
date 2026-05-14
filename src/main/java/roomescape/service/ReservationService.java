@@ -7,6 +7,8 @@ import roomescape.exception.InvalidDateOrTimeFormatException;
 import roomescape.exception.RequestParameterMissingException;
 import roomescape.model.Reservation;
 import roomescape.model.Reservations;
+import roomescape.repository.QueryingDAO;
+import roomescape.repository.UpdatingDAO;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -17,12 +19,16 @@ import java.util.concurrent.atomic.AtomicLong;
 @Service
 public class ReservationService {
 
-    private final Reservations reservations = new Reservations();
+    private final UpdatingDAO updatingDAO;
+    private final QueryingDAO queryingDAO;
 
-    private final AtomicLong id = new AtomicLong(1);
+    public ReservationService(UpdatingDAO updatingDAO, QueryingDAO queryingDAO) {
+        this.updatingDAO = updatingDAO;
+        this.queryingDAO = queryingDAO;
+    }
 
     public List<ReservationResponse> getReservations() {
-        return reservations.getReservations().stream().map(ReservationResponse::new).toList();
+        return queryingDAO.findAllReservations().stream().map(ReservationResponse::new).toList();
     }
 
     public ReservationResponse addReservation(ReservationRequest request) throws InvalidDateOrTimeFormatException {
@@ -43,7 +49,7 @@ public class ReservationService {
             throw new InvalidDateOrTimeFormatException("Date or Time has invalid format.");
         }
 
-        reservations.addReservation(reservation);
+        // reservations.addReservation(reservation);
 
         return new ReservationResponse(reservation);
     }
