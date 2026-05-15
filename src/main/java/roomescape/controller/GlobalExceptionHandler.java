@@ -4,10 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import roomescape.exception.InvalidDateOrTimeFormatException;
-import roomescape.exception.NoSuchElementToDeleteException;
-import roomescape.exception.OverlappedReservationsException;
-import roomescape.exception.RequestParameterMissingException;
+import roomescape.exception.*;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -18,23 +15,31 @@ import java.util.NoSuchElementException;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler
-    public ResponseEntity<Map<String, Object>> handleMissingParameter(RequestParameterMissingException e) {
-        return e.createExceptionResponse();
+    public ResponseEntity<ErrorResponseBody> handleMissingParameter(RequestParameterMissingException e) {
+        return ResponseEntity
+                .status(e.getStatus())
+                .body(ErrorResponseBody.from(e.getMessage()));
     }
 
     @ExceptionHandler
-    public ResponseEntity<Map<String, Object>> handleNoElementToDelete(NoSuchElementToDeleteException e) {
-        return e.createExceptionResponse();
+    public ResponseEntity<ErrorResponseBody> handleNoElementToDelete(NoSuchElementToDeleteException e) {
+        return ResponseEntity
+                .status(e.getStatus())
+                .body(ErrorResponseBody.from(e.getMessage()));
     }
 
     @ExceptionHandler
-    public ResponseEntity<Map<String, Object>> handleOverlappedReservations(OverlappedReservationsException e) {
-        return e.createExceptionResponse();
+    public ResponseEntity<ErrorResponseBody> handleOverlappedReservations(OverlappedReservationsException e) {
+        return ResponseEntity
+                .status(e.getStatus())
+                .body(ErrorResponseBody.from(e.getMessage()));
     }
 
     @ExceptionHandler
-    public ResponseEntity<Map<String, Object>> handleInvalidDateTime(InvalidDateOrTimeFormatException e) {
-        return e.createExceptionResponse();
+    public ResponseEntity<ErrorResponseBody> handleInvalidDateTime(InvalidDateOrTimeFormatException e) {
+        return ResponseEntity
+                .status(e.getStatus())
+                .body(ErrorResponseBody.from(e.getMessage()));
     }
 }
 

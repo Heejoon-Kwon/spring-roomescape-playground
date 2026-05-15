@@ -4,25 +4,31 @@ import org.springframework.stereotype.Service;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.exception.InvalidDateOrTimeFormatException;
+import roomescape.exception.NoSuchElementToDeleteException;
+import roomescape.exception.OverlappedReservationsException;
 import roomescape.exception.RequestParameterMissingException;
 import roomescape.model.Reservation;
-import roomescape.model.Reservations;
+import roomescape.repository.QueryingDAO;
+import roomescape.repository.UpdatingDAO;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class ReservationService {
 
-    private final Reservations reservations = new Reservations();
+    private final UpdatingDAO updatingDAO;
+    private final QueryingDAO queryingDAO;
 
-    private final AtomicLong id = new AtomicLong(1);
+    public ReservationService(UpdatingDAO updatingDAO, QueryingDAO queryingDAO) {
+        this.updatingDAO = updatingDAO;
+        this.queryingDAO = queryingDAO;
+    }
 
     public List<ReservationResponse> getReservations() {
-        return reservations.getReservations().stream().map(ReservationResponse::new).toList();
+        return queryingDAO.findAllReservations().stream().map(ReservationResponse::new).toList();
     }
 
     public ReservationResponse addReservation(ReservationRequest request) throws InvalidDateOrTimeFormatException {
@@ -30,26 +36,30 @@ public class ReservationService {
         String date = getRequiredValue(request.date, "date");
         String time = getRequiredValue(request.time, "time");
 
-        Reservation reservation = null;
+        Reservation reservation = new Reservation();
 
+        reservation.setName(name);
         try {
-            reservation = new Reservation(
-                    id.getAndIncrement(),
-                    name,
-                    LocalDate.parse(date),
-                    LocalTime.parse(time)
-            );
+            reservation.setDateAndTime(LocalDate.parse(date), LocalTime.parse(time));
         } catch (DateTimeParseException e) {
             throw new InvalidDateOrTimeFormatException("Date or Time has invalid format.");
         }
 
-        reservations.addReservation(reservation);
+        if (queryingDAO.existsOverlappingReservation(reservation)) {
+            throw new OverlappedReservationsException("Reservations overlap");
+        }
+
+        Long id = updatingDAO.insertWithKeyHolder(reservation);
+        reservation.setId(id);
 
         return new ReservationResponse(reservation);
     }
 
     public void deleteReservation(Long id) {
-        reservations.deleteReservation(id);
+        Reservation reservation = queryingDAO.findReservationById(id)
+                .orElseThrow(() -> new NoSuchElementToDeleteException("There is no reservation with id " + id));
+
+        updatingDAO.delete(reservation);
     }
 
     private String getRequiredValue(String value, String parameterName) {
