@@ -6,6 +6,8 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import roomescape.model.Reservation;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,7 +20,7 @@ public class QueryingDAO {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private final RowMapper<Reservation> actorRowMapper = (resultSet, rowNum) -> {
+    private final RowMapper<Reservation> reservationRowMapper = (resultSet, rowNum) -> {
         Reservation reservation = new Reservation();
 
         reservation.setId(resultSet.getLong("id"));
@@ -31,7 +33,7 @@ public class QueryingDAO {
     public Optional<Reservation> findReservationById(Long id) {
         String sql = "select id, name, date, time from reservation where id = ?";
         try {
-            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, actorRowMapper, id));
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, reservationRowMapper, id));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
@@ -39,13 +41,27 @@ public class QueryingDAO {
 
     public List<Reservation> findAllReservations() {
         String sql = "select id, name, date, time from reservation order by id";
-        return jdbcTemplate.query(sql, actorRowMapper);
+        return jdbcTemplate.query(sql, reservationRowMapper);
     }
 
     public boolean existsOverlappingReservation(Reservation newReservation) {
-        return findAllReservations().stream()
-                .filter(existingReservation -> !isSameReservation(existingReservation, newReservation))
-                .anyMatch(existingReservation -> isOverlapped(existingReservation, newReservation));
+        LocalDate date = newReservation.getStartTime().toLocalDate();
+        LocalTime time = newReservation.getStartTime().toLocalTime();
+
+        String sql = """
+                SELECT count(*)
+                FROM reservation
+                WHERE date = ?
+                AND time > ?
+                AND time < ?
+                """;
+
+        LocalTime startTimeBound = time.minusHours(Reservation.AVAILABLE_HOURS);
+        LocalTime endTimeBound = time.plusHours(Reservation.AVAILABLE_HOURS);
+
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, date, startTimeBound, endTimeBound);
+
+        return count > 0;
     }
 
     private boolean isSameReservation(Reservation existingReservation, Reservation newReservation) {
