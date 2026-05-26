@@ -63,14 +63,4 @@ public class QueryingDAO {
 
         return count > 0;
     }
-
-    private boolean isSameReservation(Reservation existingReservation, Reservation newReservation) {
-        return newReservation.getId() != null
-                && newReservation.getId().equals(existingReservation.getId());
-    }
-
-    private boolean isOverlapped(Reservation existingReservation, Reservation newReservation) {
-        return newReservation.getStartTime().isBefore(existingReservation.getEndTime())
-                && newReservation.getEndTime().isAfter(existingReservation.getStartTime());
-    }
 }

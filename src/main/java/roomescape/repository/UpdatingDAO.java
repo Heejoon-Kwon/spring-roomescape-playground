@@ -32,7 +32,8 @@ public class UpdatingDAO {
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(
                     "insert into reservation (name, date, time) values (?, ?, ?)",
-                    new String[]{"id"});
+                    new String[]{"id"}
+            );
             ps.setString(1, reservation.getName());
             ps.setObject(2, reservation.getStartTime().toLocalDate());
             ps.setObject(3, reservation.getStartTime().toLocalTime());
