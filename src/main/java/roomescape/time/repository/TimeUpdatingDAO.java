@@ -24,7 +24,7 @@ public class TimeUpdatingDAO {
                     "insert into time (time) values (?)",
                     new String[]{"id"}
             );
-            ps.setObject(1, time.getTime().toString());
+            ps.setString(1, time.getTime().toString());
             return ps;
         }, keyHolder);
 

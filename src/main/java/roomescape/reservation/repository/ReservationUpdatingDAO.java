@@ -17,26 +17,16 @@ public class ReservationUpdatingDAO {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void insert(Reservation reservation) {
-        String sql = "insert into reservation(name, date, time) values(?, ?, ?)";
-        jdbcTemplate.update(
-                sql,
-                reservation.getName(),
-                reservation.getStartTime().toLocalDate(),
-                reservation.getStartTime().toLocalTime()
-        );
-    }
-
     public Long insertWithKeyHolder(Reservation reservation) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(
-                    "insert into reservation (name, date, time) values (?, ?, ?)",
+                    "insert into reservation (name, date, time_id) values (?, ?, ?)",
                     new String[]{"id"}
             );
             ps.setString(1, reservation.getName());
-            ps.setObject(2, reservation.getStartTime().toLocalDate());
-            ps.setObject(3, reservation.getStartTime().toLocalTime());
+            ps.setString(2, reservation.getDate().toString());
+            ps.setLong(3, reservation.getTime().getId());
             return ps;
         }, keyHolder);
 

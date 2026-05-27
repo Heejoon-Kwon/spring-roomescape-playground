@@ -7,10 +7,7 @@ import java.time.LocalTime;
 public class TimeCreationRequest {
     public String time;
 
-    public static Time toEntity(TimeCreationRequest request) {
-        Time time = new Time();
-        time.setTime(LocalTime.parse(request.time));
-
-        return time;
+    public static Time toEntityFrom(TimeCreationRequest request) {
+        return new Time(LocalTime.parse(request.time));
     }
 }

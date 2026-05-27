@@ -3,15 +3,20 @@ package roomescape.reservation.dto;
 import roomescape.reservation.model.Reservation;
 
 public class ReservationResponse {
-    public final long id;
-    public final String name;
-    public final String date;
-    public final String time;
+    public long id;
+    public String name;
+    public String date;
+    public String time;
 
-    public ReservationResponse(Reservation reservation) {
-        this.id = reservation.getId();
-        this.name = reservation.getName();
-        this.date = reservation.getStartTime().toLocalDate().toString();
-        this.time = reservation.getStartTime().toLocalTime().toString();
+    public ReservationResponse() {}
+
+    public static ReservationResponse from(Reservation reservation) {
+        ReservationResponse response = new ReservationResponse();
+        response.id = reservation.getId();
+        response.name = reservation.getName();
+        response.date = reservation.getDate().toString();
+        response.time = reservation.getTime().getTime().toString();
+
+        return response;
     }
 }

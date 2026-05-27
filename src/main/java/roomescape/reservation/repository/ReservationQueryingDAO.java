@@ -1,10 +1,10 @@
 package roomescape.reservation.repository;
 
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.model.Reservation;
+import roomescape.time.model.Time;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -21,46 +21,53 @@ public class ReservationQueryingDAO {
     }
 
     private final RowMapper<Reservation> reservationRowMapper = (resultSet, rowNum) -> {
-        Reservation reservation = new Reservation();
+        Long id = resultSet.getLong("id");
+        String name = resultSet.getString("name");
+        LocalDate date = resultSet.getDate("date").toLocalDate();
 
-        reservation.setId(resultSet.getLong("id"));
-        reservation.setName(resultSet.getString("name"));
-        reservation.setDateAndTime(resultSet.getDate("date").toLocalDate(), resultSet.getTime("time").toLocalTime());
+        Reservation reservation = new Reservation(name, date);
+        reservation.setId(id);
+
+        Long time_id = resultSet.getLong("time_id");
+        LocalTime time_value = LocalTime.parse(resultSet.getString("time_value"));
+
+        Time time = new Time(time_value);
+        time.setId(time_id);
+
+        reservation.setTime(time);
 
         return reservation;
     };
 
     public Optional<Reservation> findReservationById(Long id) {
-        String sql = "select id, name, date, time from reservation where id = ?";
-        try {
-            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, reservationRowMapper, id));
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
-        }
+        String sql =
+"""
+select 
+    r.id, 
+    r. name, 
+    r. date, 
+    t.id as time_id,
+    t.name as time_value
+from reservation as r inner join time as t on r.time_id = t.id 
+where id = ?
+""";
+
+        return Optional.ofNullable(jdbcTemplate.queryForObject(sql, reservationRowMapper, id));
+
     }
 
     public List<Reservation> findAllReservations() {
-        String sql = "select id, name, date, time from reservation order by id";
+        String sql =
+"""
+select 
+    r.id, 
+    r.name, 
+    r.date,
+    t.id as time_id,
+    t.time as time_value 
+from reservation as r inner join time as t on r.time_id = t.id order by r.id
+""";
+
         return jdbcTemplate.query(sql, reservationRowMapper);
-    }
-
-    public boolean existsOverlappingReservation(Reservation newReservation) {
-        LocalDate date = newReservation.getStartTime().toLocalDate();
-        LocalTime time = newReservation.getStartTime().toLocalTime();
-
-        String sql = """
-                SELECT count(*)
-                FROM reservation
-                WHERE date = ?
-                AND time > ?
-                AND time < ?
-                """;
-
-        LocalTime startTimeBound = time.minusHours(Reservation.AVAILABLE_HOURS);
-        LocalTime endTimeBound = time.plusHours(Reservation.AVAILABLE_HOURS);
-
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, date, startTimeBound, endTimeBound);
-
-        return count > 0;
     }
 }

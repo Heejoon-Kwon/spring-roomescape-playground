@@ -1,13 +1,17 @@
 package roomescape.reservation.dto;
 
-public class ReservationRequest {
-    public final String name;
-    public final String date;
-    public final String time;
+import roomescape.reservation.model.Reservation;
+import java.time.LocalDate;
 
-    public ReservationRequest(String name, String date, String time) {
-        this.name = name;
-        this.date = date;
-        this.time = time;
+public class ReservationRequest {
+    public String name;
+    public String date;
+    public String time;
+
+    public static Reservation toEntityFrom(ReservationRequest request) {
+        return new Reservation(
+                request.name,
+                LocalDate.parse(request.date)
+        );
     }
 }

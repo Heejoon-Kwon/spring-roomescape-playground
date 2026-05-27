@@ -160,6 +160,28 @@ public class MissionStepTest {
 
     @Test
     void 구단계() {
+//        Map<String, String> params1 = new HashMap<>();
+//        params1.put("time", "10:00");
+//
+//        RestAssured.given().log().all()
+//                .contentType(ContentType.JSON)
+//                .body(params1)
+//                .when().post("/times")
+//                .then().log().all()
+//                .statusCode(201)
+//                .header("Location", "/times/1");
+//
+//        Map<String, String> params2 = new HashMap<>();
+//        params2.put("time", "13:00");
+//
+//        RestAssured.given().log().all()
+//                .contentType(ContentType.JSON)
+//                .body(params2)
+//                .when().post("/times")
+//                .then().log().all()
+//                .statusCode(201)
+//                .header("Location", "/times/2");
+
         Map<String, String> reservation = new HashMap<>();
         reservation.put("name", "브라운");
         reservation.put("date", "2023-08-05");

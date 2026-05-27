@@ -1,5 +1,6 @@
 package roomescape.time.repository;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -7,6 +8,7 @@ import roomescape.time.model.Time;
 
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class TimeQueryingDAO {
@@ -14,10 +16,11 @@ public class TimeQueryingDAO {
     private JdbcTemplate jdbcTemplate;
 
     private final RowMapper<Time> timeRowMapper = (resultSet, rowNum) -> {
-        Time time = new Time();
+        Long id = resultSet.getLong("id");
+        LocalTime time_value = LocalTime.parse(resultSet.getString("time"));
 
-        time.setId(resultSet.getLong("id"));
-        time.setTime(LocalTime.parse(resultSet.getString("time")));
+        Time time = new Time(time_value);
+        time.setId(id);
 
         return time;
     };
@@ -26,10 +29,16 @@ public class TimeQueryingDAO {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public Time findTimeById(Long id) {
+    public Optional<Time> findTimeById(Long id) throws EmptyResultDataAccessException {
         String sql = "select * from time where id = ?";
 
-        return jdbcTemplate.queryForObject(sql, timeRowMapper, id);
+        return Optional.ofNullable(jdbcTemplate.queryForObject(sql, timeRowMapper, id));
+    }
+
+    public Optional<Time> findTimeByValue(String value) throws EmptyResultDataAccessException {
+        String sql = "select * from time where time = ?";
+
+        return Optional.ofNullable(jdbcTemplate.queryForObject(sql, timeRowMapper, value));
     }
 
     public List<Time> findAllTime() {

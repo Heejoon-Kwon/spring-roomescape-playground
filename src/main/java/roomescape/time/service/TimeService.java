@@ -2,6 +2,7 @@ package roomescape.time.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import roomescape.common.exception.NoSuchElementToDeleteException;
 import roomescape.time.dto.TimeCreationRequest;
 import roomescape.time.dto.TimeResponse;
 import roomescape.time.model.Time;
@@ -29,7 +30,7 @@ public class TimeService {
     }
 
     public TimeResponse addTime(TimeCreationRequest request) {
-        Time newTime = TimeCreationRequest.toEntity(request);
+        Time newTime = TimeCreationRequest.toEntityFrom(request);
         Long id = timeUpdatingDAO.insertWithKeyHolder(newTime);
         newTime.setId(id);
 
@@ -37,7 +38,8 @@ public class TimeService {
     }
 
     public void deleteTime(Long id) {
-        Time time = timeQueryingDAO.findTimeById(id);
+        Time time = timeQueryingDAO.findTimeById(id)
+                .orElseThrow(() -> new NoSuchElementToDeleteException("There is no reservation with id " + id));
         timeUpdatingDAO.delete(time);
     }
 }
