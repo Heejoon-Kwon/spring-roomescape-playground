@@ -6,6 +6,7 @@ import roomescape.common.exception.NoSuchElementToDeleteException;
 import roomescape.time.dto.TimeCreationRequest;
 import roomescape.time.dto.TimeResponse;
 import roomescape.time.model.Time;
+import roomescape.time.model.TimeManager;
 import roomescape.time.repository.TimeQueryingDAO;
 import roomescape.time.repository.TimeUpdatingDAO;
 
@@ -30,7 +31,12 @@ public class TimeService {
     }
 
     public TimeResponse addTime(TimeCreationRequest request) {
+        List<Time> timeList = timeQueryingDAO.findAllTime();
+        TimeManager timeManager = new TimeManager(timeList);
+
         Time newTime = TimeCreationRequest.toEntityFrom(request);
+
+        timeManager.validateTime(newTime);
         Long id = timeUpdatingDAO.insertWithKeyHolder(newTime);
         newTime.setId(id);
 

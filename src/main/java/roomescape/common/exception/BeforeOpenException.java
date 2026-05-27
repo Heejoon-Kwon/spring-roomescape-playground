@@ -2,8 +2,8 @@ package roomescape.common.exception;
 
 import org.springframework.http.HttpStatus;
 
-public class InvalidDateOrTimeFormatException extends BusinessException {
-    public InvalidDateOrTimeFormatException(String message) {
+public class BeforeOpenException extends BusinessException {
+    public BeforeOpenException(String message) {
         super(message, HttpStatus.BAD_REQUEST);
     }
 }

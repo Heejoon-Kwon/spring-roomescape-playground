@@ -6,15 +6,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.format.DateTimeParseException;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    @ExceptionHandler
-    public ResponseEntity<ErrorResponseBody> handleMissingParameter(RequestParameterMissingException e) {
-        return ResponseEntity
-                .status(e.getStatus())
-                .body(ErrorResponseBody.from(e.getMessage()));
-    }
 
     @ExceptionHandler
     public ResponseEntity<ErrorResponseBody> handleNoElementToDelete(NoSuchElementToDeleteException e) {
@@ -38,14 +33,28 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
-    public ResponseEntity<ErrorResponseBody> handleOverlappedReservations(OverlappedReservationsException e) {
+    public ResponseEntity<ErrorResponseBody> handleDateTimeUnparsable(DateTimeParseException e) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponseBody.from("The date or time string provided is invalid"));
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponseBody> handleBeforeOpen(BeforeOpenException e) {
         return ResponseEntity
                 .status(e.getStatus())
                 .body(ErrorResponseBody.from(e.getMessage()));
     }
 
     @ExceptionHandler
-    public ResponseEntity<ErrorResponseBody> handleInvalidDateTime(InvalidDateOrTimeFormatException e) {
+    public ResponseEntity<ErrorResponseBody> handleAfterClose(AfterCloseException e) {
+        return ResponseEntity
+                .status(e.getStatus())
+                .body(ErrorResponseBody.from(e.getMessage()));
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponseBody> handleOverlappingTime(OverlappingReservationTimeException e) {
         return ResponseEntity
                 .status(e.getStatus())
                 .body(ErrorResponseBody.from(e.getMessage()));

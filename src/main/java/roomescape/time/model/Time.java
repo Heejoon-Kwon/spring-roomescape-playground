@@ -15,4 +15,11 @@ public class Time {
     public Time(LocalTime time) {
         this.time = time;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Time that)) return false;
+
+        return this.getTime() == that.getTime();
+    }
 }

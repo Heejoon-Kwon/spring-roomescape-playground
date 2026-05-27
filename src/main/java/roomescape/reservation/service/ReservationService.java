@@ -1,5 +1,6 @@
 package roomescape.reservation.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.NoSuchReservationTimeException;
 import roomescape.reservation.dto.ReservationRequest;
@@ -20,6 +21,7 @@ public class ReservationService {
     private final ReservationQueryingDAO reservationQueryingDAO;
     private final TimeQueryingDAO timeQueryingDAO;
 
+    @Autowired
     public ReservationService(ReservationUpdatingDAO reservationUpdatingDAO, ReservationQueryingDAO reservationQueryingDAO, TimeQueryingDAO timeQueryingDAO) {
         this.reservationUpdatingDAO = reservationUpdatingDAO;
         this.reservationQueryingDAO = reservationQueryingDAO;
