@@ -1,10 +1,10 @@
-package roomescape.repository;
+package roomescape.reservation.repository;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import roomescape.model.Reservation;
+import roomescape.reservation.model.Reservation;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -12,11 +12,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class QueryingDAO {
+public class ReservationQueryingDAO {
 
     private JdbcTemplate jdbcTemplate;
 
-    public QueryingDAO(JdbcTemplate jdbcTemplate) {
+    public ReservationQueryingDAO(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

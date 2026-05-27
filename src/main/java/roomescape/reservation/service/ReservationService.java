@@ -1,15 +1,15 @@
-package roomescape.service;
+package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.dto.ReservationRequest;
-import roomescape.dto.ReservationResponse;
-import roomescape.exception.InvalidDateOrTimeFormatException;
-import roomescape.exception.NoSuchElementToDeleteException;
-import roomescape.exception.OverlappedReservationsException;
-import roomescape.exception.RequestParameterMissingException;
-import roomescape.model.Reservation;
-import roomescape.repository.QueryingDAO;
-import roomescape.repository.UpdatingDAO;
+import roomescape.reservation.dto.ReservationRequest;
+import roomescape.reservation.dto.ReservationResponse;
+import roomescape.common.exception.InvalidDateOrTimeFormatException;
+import roomescape.common.exception.NoSuchElementToDeleteException;
+import roomescape.common.exception.OverlappedReservationsException;
+import roomescape.common.exception.RequestParameterMissingException;
+import roomescape.reservation.model.Reservation;
+import roomescape.reservation.repository.ReservationQueryingDAO;
+import roomescape.reservation.repository.ReservationUpdatingDAO;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -19,16 +19,16 @@ import java.util.List;
 @Service
 public class ReservationService {
 
-    private final UpdatingDAO updatingDAO;
-    private final QueryingDAO queryingDAO;
+    private final ReservationUpdatingDAO reservationUpdatingDAO;
+    private final ReservationQueryingDAO reservationQueryingDAO;
 
-    public ReservationService(UpdatingDAO updatingDAO, QueryingDAO queryingDAO) {
-        this.updatingDAO = updatingDAO;
-        this.queryingDAO = queryingDAO;
+    public ReservationService(ReservationUpdatingDAO reservationUpdatingDAO, ReservationQueryingDAO reservationQueryingDAO) {
+        this.reservationUpdatingDAO = reservationUpdatingDAO;
+        this.reservationQueryingDAO = reservationQueryingDAO;
     }
 
     public List<ReservationResponse> getReservations() {
-        return queryingDAO.findAllReservations().stream().map(ReservationResponse::new).toList();
+        return reservationQueryingDAO.findAllReservations().stream().map(ReservationResponse::new).toList();
     }
 
     public ReservationResponse addReservation(ReservationRequest request) throws InvalidDateOrTimeFormatException {
@@ -45,21 +45,21 @@ public class ReservationService {
             throw new InvalidDateOrTimeFormatException("Date or Time has invalid format.");
         }
 
-        if (queryingDAO.existsOverlappingReservation(reservation)) {
+        if (reservationQueryingDAO.existsOverlappingReservation(reservation)) {
             throw new OverlappedReservationsException("Reservations overlap");
         }
 
-        Long id = updatingDAO.insertWithKeyHolder(reservation);
+        Long id = reservationUpdatingDAO.insertWithKeyHolder(reservation);
         reservation.setId(id);
 
         return new ReservationResponse(reservation);
     }
 
     public void deleteReservation(Long id) {
-        Reservation reservation = queryingDAO.findReservationById(id)
+        Reservation reservation = reservationQueryingDAO.findReservationById(id)
                 .orElseThrow(() -> new NoSuchElementToDeleteException("There is no reservation with id " + id));
 
-        updatingDAO.delete(reservation);
+        reservationUpdatingDAO.delete(reservation);
     }
 
     private String getRequiredValue(String value, String parameterName) {

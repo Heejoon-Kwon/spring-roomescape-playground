@@ -1,19 +1,19 @@
-package roomescape.repository;
+package roomescape.reservation.repository;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.model.Reservation;
+import roomescape.reservation.model.Reservation;
 
 import java.sql.PreparedStatement;
 
 @Repository
-public class UpdatingDAO {
+public class ReservationUpdatingDAO {
 
     private JdbcTemplate jdbcTemplate;
 
-    public UpdatingDAO(JdbcTemplate jdbcTemplate) {
+    public ReservationUpdatingDAO(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

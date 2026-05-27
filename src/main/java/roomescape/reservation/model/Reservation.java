@@ -1,4 +1,4 @@
-package roomescape.model;
+package roomescape.reservation.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
@@ -14,11 +14,8 @@ public class Reservation {
     public static final int AVAILABLE_HOURS = 2;
 
     private Long id;
-
     private String name;
-
     private LocalDateTime startTime;
-
     private LocalDateTime endTime;
 
     public Reservation() {}

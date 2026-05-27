@@ -1,6 +1,6 @@
-package roomescape.dto;
+package roomescape.reservation.dto;
 
-import roomescape.model.Reservation;
+import roomescape.reservation.model.Reservation;
 
 public class ReservationResponse {
     public final long id;

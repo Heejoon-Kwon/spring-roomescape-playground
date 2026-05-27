@@ -1,4 +1,4 @@
-package roomescape.dto;
+package roomescape.reservation.dto;
 
 public class ReservationRequest {
     public final String name;
