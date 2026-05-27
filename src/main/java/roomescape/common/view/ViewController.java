@@ -13,6 +13,6 @@ public class ViewController {
 
     @GetMapping("/reservation")
     public String showReservation() {
-        return "reservation";
+        return "new-reservation";
     }
 }
