@@ -60,4 +60,3 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponseBody.from(e.getMessage()));
     }
 }
-

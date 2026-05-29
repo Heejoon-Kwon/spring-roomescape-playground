@@ -20,6 +20,6 @@ public class Time {
     public boolean equals(Object obj) {
         if (!(obj instanceof Time that)) return false;
 
-        return this.getTime() == that.getTime();
+        return this.getTime().equals(that.getTime());
     }
 }

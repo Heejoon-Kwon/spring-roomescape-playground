@@ -7,48 +7,45 @@ import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.common.exception.NoSuchElementToDeleteException;
 import roomescape.reservation.model.Reservation;
-import roomescape.reservation.repository.ReservationQueryingDAO;
-import roomescape.reservation.repository.ReservationUpdatingDAO;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.time.model.Time;
-import roomescape.time.repository.TimeQueryingDAO;
+import roomescape.time.repository.TimeRepository;
 
 import java.util.List;
 
 @Service
 public class ReservationService {
 
-    private final ReservationUpdatingDAO reservationUpdatingDAO;
-    private final ReservationQueryingDAO reservationQueryingDAO;
-    private final TimeQueryingDAO timeQueryingDAO;
+    private final ReservationRepository reservationRepository;
+    private final TimeRepository timeRepository;
 
     @Autowired
-    public ReservationService(ReservationUpdatingDAO reservationUpdatingDAO, ReservationQueryingDAO reservationQueryingDAO, TimeQueryingDAO timeQueryingDAO) {
-        this.reservationUpdatingDAO = reservationUpdatingDAO;
-        this.reservationQueryingDAO = reservationQueryingDAO;
-        this.timeQueryingDAO = timeQueryingDAO;
+    public ReservationService(ReservationRepository reservationRepository, TimeRepository timeRepository) {
+        this.reservationRepository = reservationRepository;
+        this.timeRepository = timeRepository;
     }
 
     public List<ReservationResponse> getReservations() {
-        return reservationQueryingDAO.findAllReservations().stream().map(ReservationResponse::from).toList();
+        return reservationRepository.findAllReservations().stream().map(ReservationResponse::from).toList();
     }
 
     public ReservationResponse addReservation(ReservationRequest request) {
         Reservation reservation = ReservationRequest.toEntityFrom(request);
 
-        Time time = timeQueryingDAO.findTimeByValue(request.time)
+        Time time = timeRepository.findTimeByValue(request.time)
                 .orElseThrow(() -> new NoSuchReservationTimeException("There is no time with value " + request.time));
         reservation.setTime(time);
 
-        Long id = reservationUpdatingDAO.insertWithKeyHolder(reservation);
+        Long id = reservationRepository.insertWithKeyHolder(reservation);
         reservation.setId(id);
 
         return ReservationResponse.from(reservation);
     }
 
     public void deleteReservation(Long id) {
-        Reservation reservation = reservationQueryingDAO.findReservationById(id)
+        Reservation reservation = reservationRepository.findReservationById(id)
                 .orElseThrow(() -> new NoSuchElementToDeleteException("There is no reservation with id " + id));
 
-        reservationUpdatingDAO.delete(reservation);
+        reservationRepository.delete(reservation);
     }
 }
