@@ -1,12 +1,11 @@
-package roomescape.controller;
+package roomescape.reservation.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import roomescape.dto.ReservationRequest;
-import roomescape.dto.ReservationResponse;
-import roomescape.exception.InvalidDateOrTimeFormatException;
-import roomescape.service.ReservationService;
+import roomescape.reservation.dto.ReservationRequest;
+import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.service.ReservationService;
 
 import java.net.URI;
 import java.util.List;
